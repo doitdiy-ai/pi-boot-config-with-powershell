@@ -541,6 +541,14 @@ raspi-config nonint do_vnc 0
 raspi-config nonint do_hostname $($BootConfigHostname.Text)
 # Set the screen resolution to 1920 x 1080, especially important for VNC to work if running headless
 raspi-config nonint do_resolution 2 82
+if  [ `"`$(source /etc/os-release; echo `"`"`"`$PRETTY_NAME`"`"`")`" == `"Raspbian GNU/Linux 11 (bullseye)`" ];
+then
+  sudo raspi-config nonint do_vnc_resolution 1920x1080
+  rfkill unblock wifi
+  for filename in /var/lib/systemd/rfkill/*:wlan ; do
+    echo 0 > `$filename
+  done
+fi
 # enable the camera (optional)
 raspi-config nonint do_camera 0
 # Set timezone
@@ -588,9 +596,10 @@ sleep 5"
 
 #--------------[wpa_supplicant.conf file]-----------------
   $wpasupplicanttext = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
 country=$(($BootConfigLocale.Text).Substring(($BootConfigLocale.Text).Length - 2))
+ap_scan=1
 
+update_config=1
 network={
         ssid=`"$($BootConfigSSID.Text)`"
         psk=`"$($BootConfigSSIDPW.Text)`"
